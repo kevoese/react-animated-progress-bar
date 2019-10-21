@@ -1,39 +1,31 @@
 import React, { Component, createRef, useEffect, useState } from "react";
 import "./app.css";
+import {
+  delay,
+  getViewPort,
+  contentInView,
+  getSVGPosition,
+  getPercentLevel,
+  getCircumference,
+  getTrackPathRadius,
+  getTrackPathBorderElementRadius,
+  getColorType
+} from "./utils";
 
 class ProgressBar extends Component {
-  // let checkDiv = document.querySelector(".myPackage");
-  // let circleObj = document.querySelector(".circleObj");
-  // let countP = document.querySelector(".countme");
-  // constructor(props) {
-  //   this.myRef = createRef();
-  // }
   state = {
-    animate: true,
+    animate: false,
     counter: 0
   };
   myRef = createRef();
   trackRef = createRef();
-  colorType = percent => {
-    const res =
-      (percent < 25 && " #F32013") ||
-      (percent < 50 && "#ff6700") ||
-      (percent < 70 && "rgb(255, 217, 0)") ||
-      "#48AE2C";
-    return res;
-  };
 
   animateCount = async () => {
     this.setState({
       counter: 0
     });
-    const delay = time =>
-      new Promise(resolve => {
-        setTimeout(() => {
-          resolve();
-        }, time);
-      });
-    await delay(1000);
+    await delay(500);
+    console.log('running')
     while (this.state.counter < Number(this.props.percentage)) {
       await delay(1000 / Number(this.props.percentage));
       this.setState(prevState => ({
@@ -43,70 +35,54 @@ class ProgressBar extends Component {
     }
   };
 
-  inView = element => {
-    const scroll = window.scrollY || window.pageYOffset;
-    const elementPositionProps = element.getBoundingClientRect();
-    const elementTopPosition = elementPositionProps.top + scroll;
-
-    const viewport = {
-      top: scroll,
-      bottom: scroll + window.innerHeight
-    };
-
-    const elementPosition = {
-      top: elementTopPosition,
-      bottom: elementTopPosition + elementPositionProps.height
-    };
-    return (
-      (elementPosition.bottom >= viewport.top &&
-        elementPosition.bottom <= viewport.bottom) ||
-      (elementPosition.top <= viewport.bottom &&
-        elementPosition.top >= viewport.top)
-    );
-  };
-
   componentDidMount() {
-    if (this.inView(this.myRef.current)) {
-      console.log("here");
-      this.setState({
-        animate: true
-      });
-      let c = 2 * 3.14 * this.props.radius;
-      let level = c - (this.props.percentage * c) / 100;
-      console.log("level", level, c);
-      this.trackRef.current.style.setProperty("--level", level);
-      this.animateCount();
-      console.log("running");
-    } else {
-      this.setState({
-        animate: true
-      });
-    }
+    document.addEventListener("scroll", () => {
+      if (!this.state.animate && contentInView(this.myRef.current)) {
+        this.animateCount();
+        this.setState({
+          animate: true
+        });
+        this.trackRef.current.style.setProperty(
+          "--level",
+          getPercentLevel(this.props.radius, this.props.percentage)
+        );
+      }
+    });
   }
 
   render() {
-    const { percentage, radius, trackWidth, percentColor } = this.props;
+    const {
+      percentage,
+      radius,
+      trackWidth,
+      trackPathColor,
+      percentColor,
+      trackBorderColor,
+      defColor,
+      bgColor
+    } = this.props;
     return (
       <div ref={this.myRef} className="progress-bar">
         <h2
           className="progress-bar-percent"
-          style={{ fontSize: `${(radius && (radius * 3) / 100) || "3"}em` , color: percentColor}}
+          style={{
+            fontSize: `${(radius && (radius * 3) / 100) || "3"}em`,
+            color: percentColor
+          }}
         >
           {this.state.counter}%
         </h2>
         <svg
-          height={`${(radius && (Number(radius) + 20) * 2) || "250"}`}
-          width={`${(radius && (Number(radius) + 20) * 2) || "250"}`}
+          height={`${(radius && getViewPort(radius)) || "250"}`}
+          width={`${(radius && getViewPort(radius)) || "250"}`}
         >
           <circle
-            className={`progress-bar-track-background ${this.state.animate &&
-              "addAnimate"}`}
+            className="progress-bar-trackPath-background"
             ref={this.trackRef}
-            cx={`${(radius && Number(radius) + 20) || "125"}`}
-            cy={`${(radius && Number(radius) + 20) || "125"}`}
-            r={`${(radius && Number(radius) - Number(trackWidth) / 2) ||
-              "100"}`}
-            stroke="rgba(158, 158, 158, 0.322)"
+            cx={`${(radius && getSVGPosition(radius)) || "125"}`}
+            cy={`${(radius && getSVGPosition(radius)) || "125"}`}
+            r={`${(radius && getTrackPathRadius(radius, trackWidth)) || "100"}`}
+            stroke={trackPathColor || "rgba(158, 158, 158, 0.322)"}
             strokeWidth={`${Number(trackWidth) || 10}`}
             fill="none"
           />
@@ -114,33 +90,33 @@ class ProgressBar extends Component {
             className={`progress-bar-track ${this.state.animate &&
               "addAnimate"}`}
             ref={this.trackRef}
-            cx={`${(radius && Number(radius) + 20) || "125"}`}
-            cy={`${(radius && Number(radius) + 20) || "125"}`}
-            r={`${(radius && Number(radius) - Number(trackWidth) / 2) ||
-              "100"}`}
-            stroke={percentage && this.colorType(percentage)}
+            cx={`${(radius && getSVGPosition(radius)) || "125"}`}
+            cy={`${(radius && getSVGPosition(radius)) || "125"}`}
+            r={`${(radius && getTrackPathRadius(radius, trackWidth)) || "100"}`}
+            stroke={percentage && getColorType(percentage, defColor)}
             strokeWidth={`${Number(trackWidth) || 10}`}
             fill="none"
-            strokeDasharray={`${radius && 2 * 3.142 * Number(radius)}`}
-            strokeDashoffset={`${radius && 2 * 3.142 * Number(radius)}`}
+            strokeDasharray={`${radius && getCircumference(radius)}`}
+            strokeDashoffset={`${radius && getCircumference(radius)}`}
           />
           <circle
-            className="circleOut"
-            cx={`${(radius && Number(radius) + 20) || "125"}`}
-            cy={`${(radius && Number(radius) + 20) || "125"}`}
+            cx={`${(radius && getSVGPosition(radius)) || "125"}`}
+            cy={`${(radius && getSVGPosition(radius)) || "125"}`}
             r={`${Number(radius) || "105"}`}
-            stroke="rgba(158, 158, 158, 0.3)"
+            stroke={trackBorderColor || "rgba(158, 158, 158, 0.3)"}
             strokeWidth="1"
             fill="none"
           />
           <circle
             className="progress-bar-hollow"
-            cx={`${(radius && Number(radius) + 20) || "125"}`}
-            cy={`${(radius && Number(radius) + 20) || "125"}`}
-            r={`${(radius && Number(radius) - Number(trackWidth)) || "95"}`}
-            stroke="rgba(158, 158, 158, 0.3)"
+            cx={`${(radius && getSVGPosition(radius)) || "125"}`}
+            cy={`${(radius && getSVGPosition(radius)) || "125"}`}
+            r={`${(radius &&
+              getTrackPathBorderElementRadius(radius, trackWidth)) ||
+              "95"}`}
+            stroke={trackBorderColor || "rgba(158, 158, 158, 0.3)"}
             strokeWidth="1"
-            fill="none"
+            fill={bgColor || "none"}
           />
         </svg>
       </div>

@@ -1,12 +1,6 @@
-.progress-bar-hollow {
-    /* circumference = 2*pi*radius 
-      c = 2 * 3.14 * 100;
-      percentage calc => (percent) => c - (percent * c/100)
-    */
-    fill: none;
-  }
+
   .addAnimate {
-    animation: grow 1.5s 1s forwards ease-out;
+    animation: grow 1.5s 0.5s forwards ease-out;
   }
   @keyframes grow {
     to {

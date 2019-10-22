@@ -1,7 +1,6 @@
 var path = require("path");
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
-
 module.exports = {
   mode: "production",
   entry: "./src/index.js",
@@ -19,12 +18,9 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        include: path.resolve(__dirname, 'src'),
+        include: path.resolve(__dirname, "src"),
         exclude: /node_modules/,
-        use: [
-          "style-loader",
-          "css-loader",
-        ]
+        use: ["style-loader", "css-loader"]
       },
       {
         test: /\.(jpe?g|png|gif|mp3|svg|ico)$/,
@@ -47,11 +43,11 @@ module.exports = {
       amd: "React",
       root: "React"
     },
-    "react-dom": {          
-      commonjs: "react-dom",          
-      commonjs2: "react-dom",          
-      amd: "ReactDOM",          
-      root: "ReactDOM"      
-  }  // this line is just to use the React dependency of our parent-testing-project instead of using our own React.
+    "react-dom": {
+      commonjs: "react-dom",
+      commonjs2: "react-dom",
+      amd: "ReactDOM",
+      root: "ReactDOM"
+    } // this line is just to use the React dependency of our parent-testing-project instead of using our own React.
   }
 };

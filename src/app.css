@@ -1,22 +1,48 @@
+.addAnimate {
+  animation: grow 1.5s 0.5s forwards ease-out;
+}
 
-  .addAnimate {
-    animation: grow 1.5s 0.5s forwards ease-out;
+.addRectAnimate {
+  animation: rectGrow 1.5s 0.5s forwards ease-out;
+}
+
+@keyframes grow {
+  to {
+    stroke-dashoffset: var(--level, 200);
   }
-  @keyframes grow {
-    to {
-      stroke-dashoffset: var(--level, 200);
-    }
+}
+
+@keyframes rectGrow {
+  to {
+    width: var(--rectLevel, 50%);
   }
-  .progress-bar {
-    position: relative;
-  }
-  .progress-bar-percent {
-    position: absolute;
-    font-size: 3em;
-    padding: 0;
-    margin: 0;
-    left: 50%;
-    top: 50%;
-    font-family: sans-serif;
-    transform: translate(-50%, -50%);
-  }
+}
+.progress-bar {
+  position: relative;
+}
+.progress-bar-percent {
+  position: absolute;
+  font-size: 3em;
+  padding: 0;
+  margin: 0;
+  left: 50%;
+  top: 50%;
+  font-family: sans-serif;
+  transform: translate(-50%, -50%);
+}
+
+.progress-bar-rect-wrap-container {
+  display: flex;
+  align-items: center;
+}
+.progress-bar-rect-wrapper {
+  width: 100%;
+}
+.progress-bar-circ-container {
+  position: relative;
+  width: fit-content;
+}
+
+* {
+  box-sizing: border-box;
+}

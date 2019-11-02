@@ -50,9 +50,26 @@ class ProgressBar extends Component {
     this.animateOnScroll();
     document.addEventListener("scroll", this.animateOnScroll);
   }
-  
-  componentWillUnmount () {
-    document.removeEventListener('scroll', this.animateOnScroll);
+
+  componentDidUpdate() {
+    if (!this.state.scrollAreaIsSet) {
+      this.setState({ scrollAreaIsSet: true });
+      (this.props.scrollArea && typeof this.props.scrollArea == 'object')
+        ? this.props.scrollArea.addEventListener('scroll', this.animateOnScroll)
+        : document.addEventListener('scroll', this.animateOnScroll);
+    }
+  }
+
+  componentWillUnmount() {
+    // unsubscribe from timeouts and delay
+    (this.props.scrollArea && typeof this.props.scrollArea == 'object')
+      ? this.props.scrollArea.removeEventListener(
+          'scroll',
+          this.animateOnScroll
+        )
+      : document.removeEventListener('scroll', this.animateOnScroll);
+    this.state.stepDelay && this.state.stepDelay.cancel();
+    this.state.countDelay && this.state.countDelay.cancel();
   }
 
   render() {

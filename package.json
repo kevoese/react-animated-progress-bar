@@ -1,6 +1,6 @@
 {
   "name": "react-animated-progress-bar",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "animated progress bar with react",
   "main": "dist/index.js",
   "scripts": {

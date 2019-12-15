@@ -24,13 +24,14 @@ class ProgressBar extends Component {
   myRef = createRef();
   rectTrackRef = createRef();
   trackRef = createRef();
+  scrollRef = createRef();
 
   animateCount = async () => {
     try {
       this.setState({
         counter: 0,
       });
-      const percentage = sanitizePercentage(this.props.percentage)
+      const percentage = sanitizePercentage(this.props.percentage);
       const stepDelay = new delay(500);
       const countDelay = new delay(1000 / percentage);
       this.setState({
@@ -51,6 +52,10 @@ class ProgressBar extends Component {
 
   animateOnScroll = () => {
     if (!this.state.animate && contentInView(this.myRef.current)) {
+      this.scrollRef.current.removeEventListener(
+        'scroll',
+        this.animateOnScroll
+      );
       this.animateCount();
       this.setState({
         animate: true,
@@ -75,20 +80,17 @@ class ProgressBar extends Component {
   componentDidUpdate() {
     if (!this.state.scrollAreaIsSet) {
       this.setState({ scrollAreaIsSet: true });
-      (this.props.scrollArea && typeof this.props.scrollArea == 'object')
-        ? this.props.scrollArea.addEventListener('scroll', this.animateOnScroll)
-        : document.addEventListener('scroll', this.animateOnScroll);
+      this.scrollRef.current =
+        this.props.scrollArea && typeof this.props.scrollArea == 'object'
+          ? this.props.scrollArea
+          : document;
+      this.scrollRef.current.addEventListener('scroll', this.animateOnScroll);
     }
   }
 
   componentWillUnmount() {
     // unsubscribe from timeouts and delay
-    (this.props.scrollArea && typeof this.props.scrollArea == 'object')
-      ? this.props.scrollArea.removeEventListener(
-          'scroll',
-          this.animateOnScroll
-        )
-      : document.removeEventListener('scroll', this.animateOnScroll);
+    this.scrollRef.current.removeEventListener('scroll', this.animateOnScroll);
     this.state.stepDelay && this.state.stepDelay.cancel();
     this.state.countDelay && this.state.countDelay.cancel();
   }

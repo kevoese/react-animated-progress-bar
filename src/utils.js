@@ -31,9 +31,10 @@ export const contentInView = element => {
   };
 
   const elementPosition = {
-    top: elementTopPosition,
-    bottom: elementTopPosition + elementPositionProps.height,
+    top: Math.floor(elementTopPosition),
+    bottom: Math.floor(elementTopPosition + elementPositionProps.height),
   };
+
   return (
     (elementPosition.bottom >= viewport.top &&
       elementPosition.bottom <= viewport.bottom) ||

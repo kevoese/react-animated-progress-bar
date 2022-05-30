@@ -1,54 +1,80 @@
-import React, { Component, createRef } from "react";
-import "./app.css";
-import { delay, contentInView, getPercentLevel, getRadius, propTypeValidation } from "./utils";
-import CircularProgressBar from "./Components/CircularProgressBar";
-import RectProgressBar from "./Components/RectProgressBar";
+import React, { Component, createRef } from 'react';
+import './app.css';
+import {
+  delay,
+  contentInView,
+  getPercentLevel,
+  getRadius,
+  propTypeValidation,
+  makeCancelable,
+  sanitizePercentage,
+} from './utils';
+import CircularProgressBar from './Components/CircularProgressBar';
+import RectProgressBar from './Components/RectProgressBar';
 class ProgressBar extends Component {
   state = {
     animate: false,
     counter: 0,
-    responsiveRadius: 0
+    responsiveRadius: 0,
+    scrollAreaIsSet: null,
+    stepDelay: null,
+    countDelay: null,
   };
-  
+
   myRef = createRef();
   rectTrackRef = createRef();
   trackRef = createRef();
+  scrollRef = createRef();
 
   animateCount = async () => {
-    this.setState({
-      counter: 0
-    });
-    await delay(500);
-    while (this.state.counter < Number(this.props.percentage)) {
-      await delay(1000 / Number(this.props.percentage));
-      this.setState(prevState => ({
-        ...prevState,
-        counter: prevState.counter + 1
-      }));
-    }
+    try {
+      this.setState({
+        counter: 0,
+      });
+      const percentage = sanitizePercentage(this.props.percentage);
+      const stepDelay = new delay(500);
+      const countDelay = new delay(1000 / percentage);
+      this.setState({
+        stepDelay,
+        countDelay,
+      });
+      await stepDelay.getPromise();
+
+      while (this.state.counter < percentage) {
+        await countDelay.getPromise();
+        this.setState(prevState => ({
+          ...prevState,
+          counter: prevState.counter + 1,
+        }));
+      }
+    } catch (error) {}
   };
 
   animateOnScroll = (shouldUpdate = false) => {
     if ((!this.state.animate && contentInView(this.myRef.current)) || shouldUpdate) {
+      this.scrollRef && this.scrollRef.current && this.scrollRef.current.removeEventListener(
+        'scroll',
+        this.animateOnScroll
+      );
       this.animateCount();
       this.setState({
-        animate: true
+        animate: true,
       });
       !this.props.rect
         ? this.trackRef.current.style.setProperty(
-            "--level",
+            '--level',
             getPercentLevel(this.props.percentage)
           )
         : this.rectTrackRef.current.style.setProperty(
-            "--rectLevel",
-            `${this.props.percentage}%`
+            '--rectLevel',
+            `${sanitizePercentage(this.props.percentage)}%`
           );
     }
   };
 
   componentDidMount() {
     this.animateOnScroll();
-    document.addEventListener("scroll", this.animateOnScroll);
+    this.setState({ scrollAreaIsSet: false });
   }
 
   componentDidUpdate(prevProps) {
@@ -65,21 +91,13 @@ class ProgressBar extends Component {
 
   componentWillUnmount() {
     // unsubscribe from timeouts and delay
-    (this.props.scrollArea && typeof this.props.scrollArea == 'object')
-      ? this.props.scrollArea.removeEventListener(
-          'scroll',
-          this.animateOnScroll
-        )
-      : document.removeEventListener('scroll', this.animateOnScroll);
+    this.scrollRef && this.scrollRef.current && this.scrollRef.current.removeEventListener('scroll', this.animateOnScroll);
     this.state.stepDelay && this.state.stepDelay.cancel();
     this.state.countDelay && this.state.countDelay.cancel();
   }
 
   render() {
-    const {
-      width,
-      rect
-    } = this.props;
+    const { width, rect } = this.props;
     return (
       <div
         ref={this.myRef}

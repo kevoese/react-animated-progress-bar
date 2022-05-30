@@ -9,26 +9,26 @@ Animated progress bar using react
 
 This package allows you to customize both circular and rectangular progress bar to various colors and sizes that suits your application or design.
 
-- Progress bar animates when component is in view. By default it uses the document reference to check if component is in view or not. But you can pass the ref object which is scrollable to the scollArea props.abs
+- Progress bar animates when component is in view. By default it uses the document reference to check if component is in view or not. But you can pass the ref object which is scrollable to the scollArea props.
 
 **For example**
 
-```
+````
 const myRef = document.querySelector('.scrollable-div')
 
 <ProgressBar width="230" trackWidth="13" percentage={score} scrollArea={myRef} />
-```
+````
 
 **Otherwise**
-if not defined it uses the document as the reference object
+if scrollArea is not defined, document reference object is used.
 
 ## Set up
 
-To use package, Start of with
+To use package, Start by installing package
 
 - npm i react-animated-progress-bar
 
-on your react project file
+**on your react project file**
 
 ### For a circular progress bar
 
@@ -44,7 +44,7 @@ import ProgressBar from 'react-animated-progress-bar';
 
 ### For a rectangular progress bar
 
-set the rect props on the component to true
+Set the rect props on the component to true
 
 ```
 import ProgressBar from 'react-animated-progress-bar';
@@ -89,7 +89,14 @@ import ProgressBar from 'react-animated-progress-bar';
 
 - scrollArea (must be a dom element): the scrollable area. By default it is document
 
-- defColor (must be an object); defines custom color for each level of the percentage ( fair )
+- defColor (must be an object); defines custom color for each level of the percentage ( poor, fair, good, excellent)
+
+Score | Level | Color
+----- | ----- |------
+poor | 0 - 25 | #F32013
+fair | 25 - 50 | #FF6700
+good | 50 - 70 | #FFD900
+excellent | 70 - 100 | #48AE2C
 
 
 ### Use case for the props in circular mode

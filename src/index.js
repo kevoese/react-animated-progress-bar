@@ -50,9 +50,9 @@ class ProgressBar extends Component {
     } catch (error) {}
   };
 
-  animateOnScroll = () => {
-    if (!this.state.animate && contentInView(this.myRef.current)) {
-      this.scrollRef.current.removeEventListener(
+  animateOnScroll = (shouldUpdate = false) => {
+    if ((!this.state.animate && contentInView(this.myRef.current)) || shouldUpdate) {
+      this.scrollRef && this.scrollRef.current && this.scrollRef.current.removeEventListener(
         'scroll',
         this.animateOnScroll
       );
@@ -77,20 +77,21 @@ class ProgressBar extends Component {
     this.setState({ scrollAreaIsSet: false });
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     if (!this.state.scrollAreaIsSet) {
       this.setState({ scrollAreaIsSet: true });
-      this.scrollRef.current =
-        this.props.scrollArea && typeof this.props.scrollArea == 'object'
-          ? this.props.scrollArea
-          : document;
-      this.scrollRef.current.addEventListener('scroll', this.animateOnScroll);
+      (this.props.scrollArea && typeof this.props.scrollArea == 'object')
+        ? this.props.scrollArea.addEventListener('scroll', () => this.animateOnScroll(true))
+        : document.addEventListener('scroll', () => this.animateOnScroll(true));
+    }
+    if(prevProps.percentage !== this.props.percentage) {
+      this.animateOnScroll(true);
     }
   }
 
   componentWillUnmount() {
     // unsubscribe from timeouts and delay
-    this.scrollRef.current.removeEventListener('scroll', this.animateOnScroll);
+    this.scrollRef && this.scrollRef.current && this.scrollRef.current.removeEventListener('scroll', this.animateOnScroll);
     this.state.stepDelay && this.state.stepDelay.cancel();
     this.state.countDelay && this.state.countDelay.cancel();
   }

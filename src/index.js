@@ -28,8 +28,8 @@ class ProgressBar extends Component {
     }
   };
 
-  animateOnScroll = () => {
-    if (!this.state.animate && contentInView(this.myRef.current)) {
+  animateOnScroll = (shouldUpdate = false) => {
+    if ((!this.state.animate && contentInView(this.myRef.current)) || shouldUpdate) {
       this.animateCount();
       this.setState({
         animate: true
@@ -51,12 +51,15 @@ class ProgressBar extends Component {
     document.addEventListener("scroll", this.animateOnScroll);
   }
 
-  componentDidUpdate() {
+  componentDidUpdate(prevProps) {
     if (!this.state.scrollAreaIsSet) {
       this.setState({ scrollAreaIsSet: true });
       (this.props.scrollArea && typeof this.props.scrollArea == 'object')
-        ? this.props.scrollArea.addEventListener('scroll', this.animateOnScroll)
-        : document.addEventListener('scroll', this.animateOnScroll);
+        ? this.props.scrollArea.addEventListener('scroll', () => this.animateOnScroll(true))
+        : document.addEventListener('scroll', () => this.animateOnScroll(true));
+    }
+    if(prevProps.percentage !== this.props.percentage) {
+      this.animateOnScroll(true);
     }
   }
 

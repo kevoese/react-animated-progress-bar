@@ -44,7 +44,7 @@ class ProgressBar extends Component {
         await countDelay.getPromise();
         this.setState(prevState => ({
           ...prevState,
-          counter: prevState.counter + 1,
+          counter: (prevState.counter + 1) > percentage ? percentage : prevState.counter + 1,
         }));
       }
     } catch (error) {}
